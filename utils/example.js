@@ -1,19 +1,14 @@
-const MerkleTree = require('./MerkleTree');
-const niceList = require('./niceList');
-const verifyProof = require('./verifyProof');
+const { MerkleTree } = require('./MerkleTree');
+const { keccak256 } = require('ethereum-cryptography/keccak');
 
-// create the merkle tree for the whole nice list
-const merkleTree = new MerkleTree(niceList);
+const names = ['Alice', 'Bob', 'Charlie', 'David', 'Eve'];
+const leaves = names.map(name => keccak256(Buffer.from(name)));
 
-// get the root
-const root = merkleTree.getRoot();
+const tree = new MerkleTree(leaves, keccak256);
+const root = tree.getRoot();
+console.log('Merkle Root:', root.toString('hex'));
 
-// find the proof that norman block is in the list 
-const name = 'Norman Block';
-const index = niceList.findIndex(n => n === name);
-const proof = merkleTree.getProof(index);
-
-// verify proof against the Merkle Root
-console.log( verifyProof(proof, name, root) ); // true, Norman Block is in the list!
-
-// TRY IT OUT: what happens if you try a name not in the list, or a fake proof?
+const nameToProve = 'Alice';
+const leaf = keccak256(Buffer.from(nameToProve));
+const proof = tree.getProof(leaf);
+console.log('Proof for Alice:', proof);
